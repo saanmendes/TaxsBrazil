@@ -38,9 +38,6 @@ class TaxControllerTest {
     @MockitoBean
     private TaxService taxService;
 
-//    @InjectMocks
-//    private TaxesController taxesController;
-
     private ObjectMapper mapper;
     private TaxCalculationResponse calculationTaxResponseDto;
 
@@ -55,57 +52,35 @@ class TaxControllerTest {
 
     @Test
     void testCreateTaxType() throws Exception {
-        // Cria um novo tipo de imposto com os dados de entrada (sem id, pois está sendo criado)
-        TaxType newTaxType = new TaxType(null, "ISS", "Tax on services");
+        TaxType newTaxType = new TaxType(3L, "ISS", "Tax on services");
 
-        // Cria o tipo de imposto que será retornado após a criação, já com o id atribuído (id = 3)
         TaxType createdTaxType = new TaxType(3L, "ISS", "Tax on services");
 
-        // WHEN: Ação - Simula a chamada do método de serviço que cria um novo tipo de imposto
-        // 'when' define o comportamento esperado do mock 'taxService' quando o método 'createTaxType' for chamado
-        // Ele vai retornar o objeto 'createdTaxType' que simulamos acima
         when(taxService.createTaxType(any(TaxType.class))).thenReturn(createdTaxType);
 
-        //  Verificação - Fazemos uma requisição HTTP e verificamos a resposta
-        mockMvc.perform(post("/api/taxes/types")  // Realiza a requisição HTTP POST no endpoint
-                        .contentType("application/json")  // Define o tipo de conteúdo da requisição como JSON
-                        .content("{\"name\": \"ISS\", \"description\": \"Tax on services\"}"))  // Corpo da requisição com os dados
 
-                // Verifica se o status da resposta é 200 OK
+        mockMvc.perform(post("/api/taxes/types")
+                        .contentType("application/json")
+                        .content("{\"name\": \"ISS\", \"description\": \"Tax on services\"}"))
+
                 .andExpect(status().isOk())
-
-                // Verifica se o 'id' retornado no JSON é igual a 3
                 .andExpect(jsonPath("$.id").value(3))
-
-                // Verifica se o 'name' retornado no JSON é igual a "ISS"
                 .andExpect(jsonPath("$.name").value("ISS"))
-
-                // Verifica se a 'description' retornada no JSON é igual a "Tax on services"
                 .andExpect(jsonPath("$.description").value("Tax on services"));
     }
 
-//    @Test
-//    void testCaseCorrectCalculation() {
-//        Double result = taxController.calculationTest(100.0);
-//    }
 
    @Test
     public void testCaseCorrectCalculation() throws Exception {
-       // Criando a requisição com o taxTypeId e baseValue
        TaxCalculationRequest calculationTaxRequest = new TaxCalculationRequest();
        calculationTaxRequest.setTaxTypeId(1L);
        calculationTaxRequest.setBaseValue(1000);
-//
-//        // Convertendo o objeto para JSON
+
        String json = mapper.writeValueAsString(calculationTaxRequest);
-//
-//        // Criando um objeto TaxCalculation para simular a resposta do serviço
+
        TaxCalculation taxCalculation = new TaxCalculation("IPI", 1000, 12, 120);
-//
-//        // Simulando o comportamento do serviço para retornar um TaxCalculation
+
       Mockito.when(taxService.calculateTax(any(TaxCalculationRequest.class))).thenReturn(taxCalculation);
-//
-//        // Realizando a requisição e verificando a resposta com MockMvc
         mockMvc.perform(
                       MockMvcRequestBuilders
                                 .post("/api/taxes/calculation")
